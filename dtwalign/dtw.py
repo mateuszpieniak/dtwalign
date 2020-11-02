@@ -84,19 +84,21 @@ def dtw(x, y, dist="euclidean", window_type="none", window_size=None,
     if x.ndim == 1: x = x[:, np.newaxis]
     if y.ndim == 1: y = y[:, np.newaxis]
 
+    window = _get_window(window_type, window_size, len_x, len_y)
+    if type(step_pattern) == str:
+        step_pattern = _get_pattern(step_pattern)
+
     # get pair-wise cost matrix
     if type(dist) == str:
         # scipy
         X = cdist(x, y, metric=dist)
     else:
         # user defined metric
-        window = _get_window(window_type, window_size, len_x, len_y)
         X = np.ones([len_x, len_y]) * np.inf
         for i, j in window.list:
             X[i, j] = dist(x[i, :], y[j, :])
 
-    return dtw_from_distance_matrix(X, window_type, window_size, step_pattern,
-        dist_only, open_begin, open_end)
+    return dtw_low(X, window, step_pattern, dist_only, open_begin, open_end)
 
 
 def dtw_from_distance_matrix(X, window_type="none", window_size=None,
