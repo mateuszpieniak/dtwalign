@@ -101,30 +101,6 @@ def dtw(x, y, dist="euclidean", window_type="none", window_size=None,
     return dtw_low(X, window, step_pattern, dist_only, open_begin, open_end)
 
 
-def dtw_from_distance_matrix(X, window_type="none", window_size=None,
-    step_pattern="symmetric2", dist_only=False, open_begin=False, open_end=False):
-    """Perform dtw using pre-computed pair-wise distance matrix.
-
-    Parameters
-    ----------
-    X : 2D array
-        Pre-computed pair-wise distance matrix.
-
-    others : 
-        see :func:`~dtwalign.dtw` function.
-
-    Returns
-    -------
-    dtwalign.result.DtwResult
-        Result obj.
-
-    """
-    len_x, len_y = X.shape
-    window = _get_window(window_type, window_size, len_x, len_y)
-    pattern = _get_pattern(step_pattern)
-    return dtw_low(X, window, pattern, dist_only, open_begin, open_end)
-
-
 def dtw_low(X, window, pattern, dist_only=False,
     open_begin=False, open_end=False):
     """Low-level dtw interface.
@@ -194,6 +170,8 @@ def _get_window(window_type, window_size, len_x, len_y):
         return SakoechibaWindow(len_x, len_y, window_size)
     elif window_type == "itakura":
         return ItakuraWindow(len_x, len_y)
+    elif window_type == "diagonal":
+        return DiagonalWindow(len_x, len_y, window_size)
     elif window_type == "none":
         return NoWindow(len_x, len_y)
     else:
@@ -255,5 +233,7 @@ def _get_pattern(pattern_str):
         return Mori2006()
     elif pattern_str == "unitary":
         return Unitary()
+    elif pattern_str == "function":
+        return Function()
     else:
         raise NotImplementedError("given step pattern not supported")

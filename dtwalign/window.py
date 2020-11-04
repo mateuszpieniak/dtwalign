@@ -17,9 +17,9 @@ class BaseWindow():
         """
         _, ax = plt.subplots(1)
         sns.heatmap(self.matrix.T, vmin=0, vmax=1,
-            xticklabels=self.matrix.shape[0]//10,
-            yticklabels=self.matrix.shape[1]//10,
-            ax=ax)
+                    xticklabels=self.matrix.shape[0] // 10,
+                    yticklabels=self.matrix.shape[1] // 10,
+                    ax=ax)
         ax.invert_yaxis()
         ax.set_title(self.label)
         ax.set_xlabel("query index")
@@ -29,6 +29,7 @@ class BaseWindow():
 
 class NoWindow(BaseWindow):
     label = "no window"
+
     def __init__(self, len_x, len_y):
         """No window class which will be used for no constraint.
 
@@ -49,6 +50,7 @@ class NoWindow(BaseWindow):
 
 class SakoechibaWindow(BaseWindow):
     label = "sakoechiba window"
+
     def __init__(self, len_x, len_y, size):
         """Sakoechiba window.
         
@@ -67,12 +69,28 @@ class SakoechibaWindow(BaseWindow):
     def _gen_window(self, len_x, len_y, size):
         xx = np.arange(len_x)
         yy = np.arange(len_y)
-        self.matrix = np.abs(xx[:,np.newaxis] - yy[np.newaxis, :]) <= size
+        self.matrix = np.abs(xx[:, np.newaxis] - yy[np.newaxis, :]) <= size
         self.list = np.argwhere(self.matrix == True)
+
+
+class DiagonalWindow(BaseWindow):
+    label = "diagonal"
+
+    def __init__(self, len_x, len_y, size):
+        super().__init__()
+        self._gen_window(len_x, len_y, size)
+
+    def _gen_window(self, len_x, len_y, size):
+        xx = np.arange(len_x)
+        yy = np.arange(len_y)
+        ratio = len_x / len_y
+        self.matrix = np.abs(xx[:, np.newaxis] - ratio * yy[np.newaxis, :]).astype(int) <= size
+        self.list = np.argwhere(self.matrix)
 
 
 class ItakuraWindow(BaseWindow):
     label = "itakura window"
+
     def __init__(self, len_x, len_y):
         """Itakura window.
 
@@ -96,15 +114,16 @@ def _gen_itakura_window(len_x, len_y):
     matrix = np.zeros((len_x, len_y), dtype=np.int8)
     for xidx in range(len_x):
         for yidx in range(len_y):
-            if (yidx < 2*xidx + 1) and (xidx <= 2*yidx + 1) and \
-                (xidx >= len_x - 2*(len_y - yidx)) and \
-                (yidx > len_y - 2*(len_x - xidx)):
+            if (yidx < 2 * xidx + 1) and (xidx <= 2 * yidx + 1) and \
+                    (xidx >= len_x - 2 * (len_y - yidx)) and \
+                    (yidx > len_y - 2 * (len_x - xidx)):
                 matrix[xidx, yidx] = 1
     return matrix
 
 
 class UserWindow(BaseWindow):
     label = "user defined window"
+
     def __init__(self, len_x, len_y, win_func, *args, **kwargs):
         """Initialize user defined window.
 
@@ -127,6 +146,6 @@ class UserWindow(BaseWindow):
         for xidx in range(len_x):
             for yidx in range(len_y):
                 if win_func(xidx, yidx, *args, **kwargs):
-                    matrix[xidx,yidx] = True
+                    matrix[xidx, yidx] = True
         self.matrix = matrix
         self.list = np.argwhere(self.matrix == True)

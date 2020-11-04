@@ -773,6 +773,18 @@ class Unitary(BasePattern):
         super().__init__()
 
 
+class Function(BasePattern):
+    label = "function"
+    pattern_info = [
+        {"indices": [(-1, 0), (0, 0)], "weights": [1]},
+        {"indices": [(-1, -1), (0, 0)], "weights": [100]},
+    ]
+    normalize_guide = "N+M"
+
+    def __init__(self):
+        super().__init__()
+
+
 class UserStepPattern(BasePattern):
     label = "user defined step pattern"
 
